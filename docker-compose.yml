@@ -1,0 +1,71 @@
+version: "3.9"
+services:
+  proxy-server:
+    image: jwilder/nginx-proxy
+    container_name: proxy-server
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - wegro_development_network
+
+  redis:
+    image: redis:latest
+    ports:
+      - target: 6379
+        published: 6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - wegro_development_network
+
+  slave:
+    image: redis:latest
+    command: redis-server --slaveof redis-master 6379
+    links:
+      - redis:redis-master
+    volumes:
+      - redis_data:/data
+    networks:
+      - wegro_development_network
+
+  sentinel:
+    build: sentinel
+    image: wegro/sentinel:latest
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    links:
+      - redis:redis-master
+      - slave
+    networks:
+      - wegro_development_network
+
+  mysql-db:
+    image: mysql:8.0.32
+    container_name: mysql-database-8
+    ports:
+      - "3336:3306"
+    volumes:
+      - wegro_mysql_db:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root_wegro_password
+      MYSQL_DATABASE: wegro
+      MYSQL_USER: wegro_user
+      MYSQL_PASSWORD: wegro_password
+    networks:
+      - wegro_development_network
+
+volumes:
+  wegro_mysql_db:
+    driver: local
+  redis_data:
+
+networks:
+  wegro_development_network:
+    name: wegro_development_network
