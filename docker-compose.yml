@@ -17,10 +17,13 @@ services:
       - wegro_development_network
     labels:
       - "com.github.nginx-proxy.nginx-proxy.ssl"
+      - "com.github.nginx-proxy.nginx"
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt-companion
+    environment:
+      - NGINX_PROXY_CONTAINER=proxy-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./certs:/etc/nginx/certs:rw
