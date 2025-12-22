@@ -36,3 +36,4 @@ echo "Certificates copied successfully!"
 echo "You can now restart the proxy-server container:"
 echo "  docker compose up -d proxy-server"
 
+
