@@ -49,7 +49,11 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - app-network
+      - wegro_development_network
 
 networks:
   app-network:
     driver: bridge
+  wegro_development_network:
+    external: true
+    name: wegro_development_network
