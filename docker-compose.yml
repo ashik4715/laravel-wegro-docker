@@ -12,6 +12,7 @@ services:
       - ./certs:/etc/nginx/certs:ro
       - ./vhost.d:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - wegro_development_network
     labels:
