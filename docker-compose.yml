@@ -9,7 +9,7 @@ services:
       - "8883:8883"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./certs:/etc/nginx/certs:ro
       - ./vhost.d:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
