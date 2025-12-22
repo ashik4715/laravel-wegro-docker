@@ -12,18 +12,21 @@
 
 **Problem**: The companion couldn't find the nginx-proxy container.
 
-**Solution**: 
+**Solution**:
+
 - Added label `com.github.nginx-proxy.nginx` to proxy-server
 - Added environment variable `NGINX_PROXY_CONTAINER=proxy-server` to letsencrypt-companion
 
 ### 2. Port 443 Connection Refused
 
 **Possible causes**:
+
 - Firewall blocking port 443
 - Nginx not properly configured to listen on 443
 - Custom config file not being loaded
 
-**Solution**: 
+**Solution**:
+
 - Verify firewall allows ports 80/443
 - Ensure custom SSL config is in place
 - Restart proxy-server after changes
@@ -33,6 +36,7 @@
 **✅ SAFE TO OPEN PORTS 80/443**
 
 **Why it's safe**:
+
 - SSH uses port **22**, not 80/443
 - Opening ports 80/443 will **NOT** affect your SSH connection
 - Ports 80/443 are required for:
@@ -41,6 +45,7 @@
   - Your website to be accessible
 
 **What you need to do**:
+
 ```bash
 # Open ports 80 and 443 (required for HTTPS)
 sudo ufw allow 80/tcp
@@ -55,6 +60,7 @@ sudo ufw reload
 ```
 
 **Your SSH connection will remain unaffected** because:
+
 - SSH uses port 22 (different from 80/443)
 - UFW rules are additive (opening 80/443 doesn't close 22)
 - You can verify with: `sudo ufw status`
@@ -62,12 +68,14 @@ sudo ufw reload
 ## Deployment Steps
 
 ### Step 1: Pull Latest Changes
+
 ```bash
 cd ~/laravel-wegro-docker
 git pull origin main
 ```
 
 ### Step 2: Open Firewall Ports (Required)
+
 ```bash
 # This is SAFE - won't affect SSH (port 22)
 sudo ufw allow 80/tcp
@@ -79,6 +87,7 @@ sudo ufw status
 ```
 
 ### Step 3: Restart Containers
+
 ```bash
 # Restart proxy-server with new label
 docker compose up -d proxy-server
@@ -91,6 +100,7 @@ docker ps | grep -E "proxy-server|letsencrypt"
 ```
 
 ### Step 4: Verify Configuration
+
 ```bash
 # Check proxy-server logs
 docker logs proxy-server --tail 50
@@ -103,6 +113,7 @@ curl -Iv https://callcircle.resilentsolutions.com
 ```
 
 ### Step 5: Verify SSL Certificate
+
 ```bash
 # Check if certificates are accessible
 ls -la /etc/letsencrypt/live/callcircle.resilentsolutions.com/
@@ -116,22 +127,25 @@ openssl s_client -connect callcircle.resilentsolutions.com:443 -servername callc
 ### If port 443 still refuses connection:
 
 1. **Check if nginx is listening on 443**:
+
    ```bash
    docker exec proxy-server netstat -tlnp | grep 443
    # Should show: tcp 0 0 :::443 :::* LISTEN
    ```
 
 2. **Check firewall status**:
+
    ```bash
    sudo ufw status verbose
    # Should show: 80/tcp ALLOW and 443/tcp ALLOW
    ```
 
 3. **Check if custom config is loaded**:
+
    ```bash
    docker exec proxy-server nginx -t
    # Should show: configuration file test is successful
-   
+
    docker exec proxy-server cat /etc/nginx/conf.d/callcircle-80-ssl.conf
    # Should show the SSL configuration
    ```
@@ -144,12 +158,14 @@ openssl s_client -connect callcircle.resilentsolutions.com:443 -servername callc
 ### If letsencrypt-companion still crashes:
 
 1. **Verify labels on proxy-server**:
+
    ```bash
    docker inspect proxy-server | grep -A 5 Labels
    # Should show: "com.github.nginx-proxy.nginx": ""
    ```
 
 2. **Verify environment variable**:
+
    ```bash
    docker inspect letsencrypt-companion | grep -A 5 Env
    # Should show: "NGINX_PROXY_CONTAINER=proxy-server"
@@ -176,4 +192,3 @@ openssl s_client -connect callcircle.resilentsolutions.com:443 -servername callc
 - [ ] Port 443 is accessible (curl test succeeds)
 - [ ] SSL certificate is valid
 - [ ] SSH connection still works (port 22)
-
