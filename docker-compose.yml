@@ -70,9 +70,9 @@ services:
       - "8080:80"
     environment:
       PMA_HOST: mysql-db
-      PMA_USER: wegro_user
-      PMA_PASSWORD: wegro_password
-      PMA_DB: wegro
+      PMA_USER: root
+      PMA_PASSWORD: root_wegro_password
+      # PMA_DB: wegro
     networks:
       - wegro_development_network
     depends_on:
