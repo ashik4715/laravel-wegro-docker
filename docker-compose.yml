@@ -4,7 +4,7 @@ services:
     image: jwilder/nginx-proxy
     container_name: proxy-server
     ports:
-      - "80:80"
+      - "8081:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -45,6 +45,7 @@ services:
 
   mysql-db:
     image: mysql:8.0.32
+    platform: linux/amd64
     container_name: mysql-database-8
     ports:
       - "3336:3306"
@@ -60,6 +61,22 @@ services:
       MYSQL_PASSWORD: wegro_password
     networks:
       - wegro_development_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    platform: linux/amd64
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql-db
+      PMA_USER: wegro_user
+      PMA_PASSWORD: wegro_password
+      PMA_DB: wegro
+    networks:
+      - wegro_development_network
+    depends_on:
+      - mysql-db
 
 volumes:
   wegro_mysql_db:
